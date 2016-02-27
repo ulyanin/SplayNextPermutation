@@ -18,6 +18,8 @@ public:
     virtual void setElem(size_t pos, long long x);
     virtual void addOnSegment(size_t L, size_t R, long long add);
     virtual void applyNextPermutation(size_t L, size_t R);
+    //virtual std::vector<long long> getAsVector(int L, int R);
+    virtual size_t size() const;
 protected:
     Node::NodePtr root_;
 };

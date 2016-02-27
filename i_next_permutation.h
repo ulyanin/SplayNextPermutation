@@ -13,18 +13,18 @@ public:
     virtual void setElem(size_t pos, long long x) = 0;
     virtual void addOnSegment(size_t L, size_t R, long long add) = 0;
     virtual void applyNextPermutation(size_t L, size_t R) = 0;
-    virtual std::vector<long long> getAsVector(size_t L, size_t R);
+    virtual size_t size() const;
+    virtual std::vector<long long> getAsVector(int L, int R)
+    {
+        std::vector<long long> res((R - L + 1), 0);
+        for (int i = L; i <= R; ++i) {
+            res[i - L] = getSumOnSegment(L, L);
+        }
+        return std::move(res);
+    }
     virtual ~INextPermutation() {}
 };
 
 
-std::vector<long long> INextPermutation::getAsVector(size_t L, size_t R)
-{
-    std::vector<long long> res((R - L + 1), 0);
-    for (size_t i = L; i <= R; ++i) {
-        res[i - L] = getSumOnSegment(L, L);
-    }
-    return std::move(res);
-}
 
 #endif //I_NEXT_PERMUTAION_H

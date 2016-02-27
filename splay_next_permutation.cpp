@@ -29,3 +29,8 @@ void SplayNextPermutation::applyNextPermutation(size_t L, size_t R)
 {
     Node::nextPermutationOnSegment(root_, L, R);
 }
+
+size_t SplayNextPermutation::size() const
+{
+    return Node::getSubTreeSize(root_);
+}

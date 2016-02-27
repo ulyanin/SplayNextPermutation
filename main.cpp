@@ -7,11 +7,11 @@
 #include <random>
 #include <vector>
 
-const int SMALL_TEST = 10;
-const int MEDIUM_TEST = 1e4;
-const int LARGE_TEST = 1e5;
-const int EXTRA_LARGE_TEST = 5e6;
-const int MAX_TEST = 1e8;
+const size_t SMALL_TEST = 100;
+const size_t MEDIUM_TEST = 1e4;
+const size_t LARGE_TEST = 1e5;
+const size_t EXTRA_LARGE_TEST = 5e6;
+const size_t MAX_TEST = 1e8;
 
 class TestData
 {
@@ -54,6 +54,8 @@ protected:
     std::uniform_int_distribution<size_t> randomRange;
     std::uniform_real_distribution<double> randomProbability;
     std::vector<TestData> tests_;
+    bool testRightStruct_;
+    INextPermutation * right_, * toTest_;
 
     long long genRandomValue(long long L, long long R)
     {
@@ -138,38 +140,54 @@ protected:
 
     void applyGetSum(const TestData &test)
     {
-        long long s1 = right_->getSumOnSegment(test.L, test.R),
-                  s2 = toTest_->getSumOnSegment(test.L, test.R);
-        EXPECT_EQ(s1, s2) << " while getting sum" << std::endl;
+        long long s1, s2;
+        s2 = toTest_->getSumOnSegment(test.L, test.R);
+        if (testRightStruct_) {
+            s1 = right_->getSumOnSegment(test.L, test.R);
+            EXPECT_EQ(s1, s2) << " while getting sum" << std::endl;
+        }
     }
 
     void applyInsertElem(const TestData &test)
     {
-        right_->insert(test.L, test.value);
+        if (testRightStruct_) {
+            right_->insert(test.L, test.value);
+        }
         toTest_->insert(test.L, test.value);
     }
 
     void applySetElem(const TestData &test)
     {
-        right_->setElem(test.L, test.value);
+        if (testRightStruct_) {
+            right_->setElem(test.L, test.value);
+        }
         toTest_->setElem(test.L, test.value);
     }
 
     void applyAdd(const TestData &test)
     {
-        right_->addOnSegment(test.L, test.R, test.value);
+        if (testRightStruct_) {
+            right_->addOnSegment(test.L, test.R, test.value);
+        }
         toTest_->addOnSegment(test.L, test.R, test.value);
     }
 
     void applyNextPermutation(const TestData &test)
     {
-        right_->applyNextPermutation(test.L, test.R);
+        if (testRightStruct_) {
+            right_->applyNextPermutation(test.L, test.R);
+        }
         toTest_->applyNextPermutation(test.L, test.R);
     }
 
-    void applyTest(INextPermutation * rightStruct, INextPermutation * testStruct, bool fullCheck=false)
+    double applyTests(INextPermutation * rightStruct, INextPermutation * testStruct,
+                      bool fullCheck=false, bool testRightStruct=true)
     {
-        right_ = rightStruct;
+        auto start(std::chrono::steady_clock::now());
+        testRightStruct_ = testRightStruct;
+        if (testRightStruct_) {
+            right_ = rightStruct;
+        }
         toTest_ = testStruct;
         int testNum = 0;
         for (auto test: tests_) {
@@ -189,16 +207,35 @@ protected:
                 case TestData::tNextPermutation:
                     applyNextPermutation(test);
             }
-            if (fullCheck) {
-                EXPECT_EQ(right_->getAsVector(), toTest_->getAsVector())
+            if (fullCheck && testRightStruct_) {
+                EXPECT_EQ(right_->getAsVector(0, (int)right_->size() - 1),
+                          toTest_->getAsVector(0, (int)toTest_->size() - 1))
                                     << " after operation on test #" << testNum << std::endl;
             }
             testNum++;
         }
+        auto end(std::chrono::steady_clock::now());
+        return std::chrono::duration_cast<std::chrono::duration<double> > (end - start).count();
     }
-
-    INextPermutation * right_, * toTest_;
 };
+
+
+TEST_F(NextPermutationTest, TestsWithFullCheck)
+{
+    size_t size = 1;
+    while ((size *= 10) <= MEDIUM_TEST) {
+        size_t cnt = MEDIUM_TEST / size * 3;
+        for (size_t i = 0; i < cnt; ++i) {
+            INextPermutation *splay = new SplayNextPermutation(),
+                             *simply = new VectorNextPermutation();
+            genTest(size, 0, (long long)(1e9));
+            applyTests(simply, splay, true);
+            delete splay;
+            delete simply;
+        }
+    }
+}
+
 
 
 int main(int argc, char **argv)
@@ -207,8 +244,8 @@ int main(int argc, char **argv)
     std::cerr.precision(9);
 
     testing::InitGoogleTest(&argc, argv);
-    std::vector<int> v1({1, 2, 3}), v2({2, 4});
-    EXPECT_EQ(v1, v2);
+//    std::vector<int> v1({1, 2, 3}), v2({2, 4});
+//    EXPECT_EQ(v1, v2);
 
     return RUN_ALL_TESTS();
 }

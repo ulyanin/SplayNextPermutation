@@ -31,6 +31,7 @@ public:
     static NodePtr getKth(NodePtr, int);
     static std::pair<NodePtr, NodePtr> split(NodePtr root, int pos);
     static NodePtr merge(NodePtr, NodePtr);
+    static int getSubTreeSize(NodePtr);
 protected:
     // must be sorted in descending order!!!
     static NodePtr findFirstGreater(NodePtr, long long);
@@ -51,7 +52,6 @@ protected:
     static void reCalcSortedPrefix(NodePtr);
     static void reCalcSortedSuffix(NodePtr);
     static long long getSum(NodePtr);
-    static int getSubTreeSize(NodePtr);
     static int getSortedSuffix(NodePtr);
     static int getSortedPrefix(NodePtr);
     NodePtr left_,
