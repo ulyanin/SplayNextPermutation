@@ -3,15 +3,17 @@
 
 #include <vector>
 
+using std::size_t;
+
 class INextPermutation
 {
 public:
-    virtual long long subSegmentSum(int L, int R) = delete;
-    virtual void Insert(int i, long long x) = delete;
-    virtual void SetElem(int i, long long x) = delete;
-    virtual void addSubSegment(int L, int R, long long add) = delete;
-    virtual void applyNextPermutation(int L, int R) = delete;
-    virtual std::vector<long long> getAsVector() = delete;
+    virtual long long getSumOnSegment(size_t L, size_t R) = 0;
+    virtual void insert(size_t newPos, long long x) = 0;
+    virtual void setElem(size_t pos, long long x) = 0;
+    virtual void addOnSegment(size_t L, size_t R, long long add) = 0;
+    virtual void applyNextPermutation(size_t L, size_t R) = 0;
+    virtual std::vector<long long> getAsVector() = 0;
     virtual ~INextPermutation() {}
 };
 

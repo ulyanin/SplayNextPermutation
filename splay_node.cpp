@@ -1,8 +1,7 @@
-#include "splay.h"
 #include <algorithm>
 #include <iostream>
 #include <stdexcept>
-#include <climits>
+#include "splay_node.h"
 
 Node::Node(long long int value)
     : left_(nullptr)
@@ -339,8 +338,10 @@ Node::NodePtr Node::merge(NodePtr L, NodePtr R)
     if (L == nullptr)
         return R;
     NodePtr newRoot = splay(getKth(L, getSubTreeSize(L) - 1));
+#ifdef DEBUG
     if (exist(newRoot->right_))
         throw std::runtime_error("wrong splay newRoot element");
+#endif
     push(R);
     newRoot->right_ = R;
     if (exist(R)) {
@@ -377,8 +378,10 @@ void Node::reverse(NodePtr &x)
 
 void Node::swapJustRoots(NodePtr &x, NodePtr &y)
 {
+#ifdef DEBUG
     if (!exist(x) && !exist(y))
         throw std::runtime_error("one of roots to swap does not exist");
+#endif
     push(x);
     push(y);
     std::swap(x->value_, y->value_);
@@ -414,19 +417,10 @@ void Node::nextPermutationOnSegment(NodePtr &x, int lPos, int rPos)
 
 Node::NodePtr Node::findFirstGreater(NodePtr x, long long key)
 {
+#ifdef DEBUG
     if (x->sortedSuffix_ != x->subTreeSize_)
         throw std::runtime_error("trying to search in unsorted tree");
-    /*if (!exist(x))
-        throw nullptr;
-    if (x->value_ <= key) {
-        if (exist(x->left_))
-            return findFirstGreater(x->left_, key);
-        return x;
-    } else {
-        if (exist(x->right_))
-            return findFirstGreater(x->right_, key);
-        return x;
-    }*/
+#endif
     NodePtr res(nullptr);
     while (exist(x)) {
         push(x);
@@ -442,12 +436,16 @@ Node::NodePtr Node::findFirstGreater(NodePtr x, long long key)
 
 void Node::setValue(NodePtr &x, int pos, long long val)
 {
+#ifdef DEBUG
     if (pos < 0 || pos >= getSubTreeSize(x))
         throw std::runtime_error("bad index in set value");
+#endif
     NodePtr L, C, R;
     getSegment(x, pos, pos, L, C, R);
+#ifdef DEBUG
     if (!exist(C))
         throw std::runtime_error("wrong index while setting the value");
+#endif
     push(C);
     C->value_ = val;
     reCalc(C);
@@ -456,8 +454,10 @@ void Node::setValue(NodePtr &x, int pos, long long val)
 
 void Node::insertValue(NodePtr &x, int newPos, long long val)
 {
+#ifdef DEBUG
     if (newPos < 0 || newPos > getSubTreeSize(x))
         throw std::runtime_error("bad index in insert value");
+#endif
     auto p = split(x, newPos);
     NodePtr newNode = new Node(val);
     merge(p.first, merge(newNode, p.second));
@@ -495,7 +495,7 @@ void Node::printAsTreeExtended(NodePtr root, int depth, bool reverse)
         std::cout << "_____________" << std::endl;
     reverse ^= root->needReverse_;
     if (reverse) {
-        //std::swap(root->left_, root->right_);
+        //std::swap(root_->left_, root_->right_);
     }
     printAsTreeExtended(root->right_, depth + 1);
     for (int i = 0; i < depth; ++i)
@@ -509,7 +509,7 @@ void Node::printAsTreeExtended(NodePtr root, int depth, bool reverse)
     std::cout << "cnt=" <<  root->subTreeSize_ << std::endl;
     printAsTreeExtended(root->left_, depth + 1);
     if (reverse) {
-        //std::swap(root->left_, root->right_);
+        //std::swap(root_->left_, root_->right_);
     }
     if (depth == 0)
         std::cout << "_____________" << std::endl;
@@ -543,31 +543,13 @@ void Node::checkIntegrity(NodePtr root, NodePtr parent)
     checkIntegrity(root->right_, root);
 }
 
-// without pair
-//void Node::split(NodePtr root, int pos, NodePtr &L, NodePtr &R)
-//{
-//    if (!exist(root)) {
-//        L = nullptr;
-//        R = nullptr;
-//        return;
-//    }
-//    if (pos < 0) {
-//        L = nullptr;
-//        R = root;
-//        return;
-//    }
-//    if (pos > root->subTreeSize_) {
-//        L = nullptr;
-//        R = root;
-//        return;
-//    }
-//    NodePtr v = getKth(root, pos);
-//    splay(v);
-//    L = root->left_;
-//    R = root;
-//    root->left_ = nullptr;
-//    if (root->left_) {
-//        root->left_->parent_ = nullptr;
-//    }
-//    return p;
-//}
+
+long long Node::getSumOnSegment(NodePtr &x, int lPos, int rPos)
+{
+    NodePtr L, C, R;
+    getSegment(x, lPos, rPos, L, C, R);
+    push(C);
+    long long sum = getSum(C);
+    x = merge(merge(L, C), R);
+    return sum;
+}

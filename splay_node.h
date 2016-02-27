@@ -16,6 +16,7 @@ public:
     static NodePtr makeFullCopy(const NodePtr &);
     static void getSegment(NodePtr, int, int, NodePtr &, NodePtr &, NodePtr &);
     static void addOnSegment(NodePtr &x, int lPos, int rPos, long long add);
+    static long long getSumOnSegment(NodePtr &x, int lPos, int rPos);
     static void nextPermutationOnSegment(NodePtr &x, int lPos, int rPos);
     static void nextPermutation(NodePtr &x);
     static void setValue(NodePtr &, int pos, long long val);
@@ -25,17 +26,16 @@ public:
     static void printAsTreeExtended(NodePtr root, int depth=0, bool reverse=0);
     static bool exist(const NodePtr);
 //    static bool exist(const NodeWeakPtr);
+    static void checkIntegrity(NodePtr root, NodePtr parent=nullptr);
     static NodePtr splay(NodePtr);
     static NodePtr getKth(NodePtr, int);
     static std::pair<NodePtr, NodePtr> split(NodePtr root, int pos);
     static NodePtr merge(NodePtr, NodePtr);
-    static void checkIntegrity(NodePtr root, NodePtr parent=nullptr);
 protected:
     // must be sorted in descending order!!!
     static NodePtr findFirstGreater(NodePtr, long long);
     static void reverse(NodePtr &);
     static void swapJustRoots(NodePtr &x, NodePtr &y);
-
     static NodePtr rotate(NodePtr &x, NodePtr p);
     static bool isLeftSon(const NodePtr x, const NodePtr p);
     static bool isRightSon(const NodePtr x, const NodePtr p);
