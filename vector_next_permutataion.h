@@ -18,7 +18,6 @@ public:
     virtual void setElem(int pos, long long x);
     virtual void addOnSegment(int L, int R, long long add);
     virtual void applyNextPermutation(int L, int R);
-    virtual std::vector<long long> getAsVector(int L, int R);
 protected:
     std::vector<long long> data_;
 };

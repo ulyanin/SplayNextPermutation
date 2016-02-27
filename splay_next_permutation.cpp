@@ -29,12 +29,3 @@ void SplayNextPermutation::applyNextPermutation(size_t L, size_t R)
 {
     Node::nextPermutationOnSegment(root_, L, R);
 }
-
-std::vector<long long> SplayNextPermutation::getAsVector(size_t L, size_t R)
-{
-    std::vector<long long> res((R - L + 1), 0);
-    for (size_t i = L; i <= R; ++i) {
-        res[i - L] = getSumOnSegment(L, L);
-    }
-    return  std::move(res);
-}
