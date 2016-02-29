@@ -199,14 +199,14 @@ void Node::push(NodePtr x)
     x->first_ += x->add_;
     x->last_ += x->add_;
     x->value_ += x->add_;
-    x->sum_ += x->add_;
+    x->sum_ += x->add_ * getSubTreeSize(x);
     x->add_ = 0;
     x->needReverse_ = false;
 }
 
 long long Node::getSum(NodePtr v)
 {
-    return exist(v) ? (v->sum_ + v->add_) : 0;
+    return exist(v) ? (v->sum_ + v->add_ * Node::getSubTreeSize(v)) : 0;
 }
 
 int Node::getSortedPrefix(NodePtr x)
@@ -265,6 +265,8 @@ void Node::reCalc(NodePtr x)
 {
     if (!exist(x))
         return;
+    push(x->left_);
+    push(x->right_);
     x->subTreeSize_ = getSubTreeSize(x->left_) + getSubTreeSize(x->right_) + 1;
     x->sum_ = getSum(x->left_) + getSum(x->right_) + x->value_;
     x->first_ = x->value_;
@@ -329,6 +331,7 @@ std::pair<Node::NodePtr, Node::NodePtr> Node::split(NodePtr root, int pos)
         p.first->parent_ = nullptr;
     }
     reCalc(p.second);
+    reCalc(p.first);
     return p;
 }
 
@@ -337,6 +340,7 @@ Node::NodePtr Node::merge(NodePtr L, NodePtr R)
 {
     if (L == nullptr)
         return R;
+    push(L);
     NodePtr newRoot = splay(getKth(L, getSubTreeSize(L) - 1));
 #ifdef DEBUG
     if (exist(newRoot->right_))
@@ -366,7 +370,7 @@ void Node::addOnSegment(NodePtr &x, int lPos, int rPos, long long add)
     getSegment(x, lPos, rPos, L, C, R);
     if (exist(C)) {
         C->add_ += add;
-        //push(C);
+        push(C);
     }
     x = merge(L, merge(C, R));
 }
@@ -374,6 +378,7 @@ void Node::addOnSegment(NodePtr &x, int lPos, int rPos, long long add)
 void Node::reverse(NodePtr &x)
 {
     x->needReverse_ ^= 1;
+    push(x);
 }
 
 void Node::swapJustRoots(NodePtr &x, NodePtr &y)
@@ -552,4 +557,14 @@ long long Node::getSumOnSegment(NodePtr &x, int lPos, int rPos)
     long long sum = getSum(C);
     x = merge(merge(L, C), R);
     return sum;
+}
+
+void Node::fullPush(NodePtr x)
+{
+    if (exist(x)) {
+        push(x);
+        fullPush(x->left_);
+        fullPush(x->right_);
+        reCalc(x);
+    }
 }

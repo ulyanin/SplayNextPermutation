@@ -25,6 +25,7 @@ public:
     static void printAsTree(NodePtr root, int depth=0, bool reverse=0);
     static void printAsTreeExtended(NodePtr root, int depth=0, bool reverse=0);
     static bool exist(const NodePtr);
+    static void fullPush(NodePtr x);
 //    static bool exist(const NodeWeakPtr);
     static void checkIntegrity(NodePtr root, NodePtr parent=nullptr);
     static NodePtr splay(NodePtr);

@@ -8,7 +8,7 @@
 #include <vector>
 
 const size_t SMALL_TEST = 100;
-const size_t MEDIUM_TEST = 1e4;
+const size_t MEDIUM_TEST = 5e3;
 const size_t LARGE_TEST = 1e5;
 const size_t EXTRA_LARGE_TEST = 5e6;
 const size_t MAX_TEST = 1e8;
@@ -78,7 +78,7 @@ protected:
         if (rnd <= prob[1])
             return TestData::tInsertElem;
         if (rnd <= prob[2])
-            return TestData::tInsertElem;
+            return TestData::tSetElem;
         if (rnd <= prob[3])
             return TestData::tAdd;
         return TestData::tNextPermutation;
@@ -98,6 +98,7 @@ protected:
                 case TestData::tGetSum:
                     L = genRandomPos(0, num - 1);
                     R = genRandomPos(L, num - 1);
+                    std::cout << R - L << std::endl;
                     tests_.push_back(TestData(
                             TestData::tGetSum,
                             L, R
@@ -109,6 +110,7 @@ protected:
                             genRandomPos(0, num),
                             genRandomValue(minValue, maxValue)
                     ));
+                    ++num;
                     break;
                 case TestData::tSetElem:
                     tests_.push_back(TestData(
@@ -120,6 +122,7 @@ protected:
                 case TestData::tAdd:
                     L = genRandomPos(0, num - 1);
                     R = genRandomPos(L, num - 1);
+                    std::cout << R - L << std::endl;
                     tests_.push_back(TestData(
                             TestData::tAdd,
                             L, R,
@@ -129,6 +132,7 @@ protected:
                 case TestData::tNextPermutation:
                     L = genRandomPos(0, num - 1);
                     R = genRandomPos(L, num - 1);
+                std::cout << R - L << std::endl;
                     tests_.push_back(TestData(
                             TestData::tNextPermutation,
                             L, R
@@ -208,9 +212,9 @@ protected:
                     applyNextPermutation(test);
             }
             if (fullCheck && testRightStruct_) {
-                EXPECT_EQ(right_->getAsVector(0, (int)right_->size() - 1),
-                          toTest_->getAsVector(0, (int)toTest_->size() - 1))
-                                    << " after operation on test #" << testNum << std::endl;
+                auto v1 = right_->getAsVector(0, (int)right_->size() - 1);
+                auto v2 = toTest_->getAsVector(0, (int)toTest_->size() - 1);
+                EXPECT_EQ(v1, v2) << " after operation on test #" << testNum << std::endl;
             }
             testNum++;
         }
@@ -220,15 +224,28 @@ protected:
 };
 
 
-TEST_F(NextPermutationTest, TestsWithFullCheck)
+TEST_F(NextPermutationTest, SimpleTest)
+{
+    size_t size = 12;
+    INextPermutation *splay = new SplayNextPermutation(),
+            *simply = new VectorNextPermutation();
+    genTest(size, 0, size);
+    applyTests(simply, splay, true);
+    delete splay;
+    delete simply;
+}
+
+TEST_F(NextPermutationTest, TestsWithFullCheckRare)
 {
     size_t size = 1;
     while ((size *= 10) <= MEDIUM_TEST) {
-        size_t cnt = MEDIUM_TEST / size * 3;
+        size_t cnt = 10;
+        if (size == MEDIUM_TEST)
+            cnt = 1;
         for (size_t i = 0; i < cnt; ++i) {
             INextPermutation *splay = new SplayNextPermutation(),
                              *simply = new VectorNextPermutation();
-            genTest(size, 0, (long long)(1e9));
+            genTest(size, 0, 1e9);
             applyTests(simply, splay, true);
             delete splay;
             delete simply;
@@ -237,12 +254,109 @@ TEST_F(NextPermutationTest, TestsWithFullCheck)
 }
 
 
+TEST_F(NextPermutationTest, TestsWithFullCheckDensely)
+{
+    size_t size = 1;
+    while ((size *= 10) <= MEDIUM_TEST) {
+        size_t cnt = 10;
+        if (size == MEDIUM_TEST)
+            cnt = 1;
+        for (size_t i = 0; i < cnt; ++i) {
+            INextPermutation *splay = new SplayNextPermutation(),
+                             *simply = new VectorNextPermutation();
+            genTest(size, 0, (long long)size / 2LL * (i + 1LL));
+            applyTests(simply, splay, true);
+            delete splay;
+            delete simply;
+        }
+    }
+}
+
+TEST_F(NextPermutationTest, SimpleTests)
+{
+    for (int i = 0; i < 100; ++i) {
+        size_t size = SMALL_TEST;
+        INextPermutation *splay = new SplayNextPermutation(),
+                *simply = new VectorNextPermutation();
+        genTest(size, 0, 1e9);
+        applyTests(simply, splay, true);
+        delete splay;
+        delete simply;
+    }
+}
+
+TEST_F(NextPermutationTest, TestInsert)
+{
+    size_t size = 1;
+    while ((size *= 10) <= MEDIUM_TEST) {
+        size_t cnt = 1000;
+        for (size_t i = 0; i < cnt; ++i) {
+            INextPermutation *splay = new SplayNextPermutation(),
+                             *simply = new VectorNextPermutation();
+            genTest(size, 0, (long long)size / 2LL * (i + 1LL), {0, 1, 0, 0, 0});
+            applyTests(simply, splay, false);
+            delete splay;
+            delete simply;
+        }
+    }
+}
+
+TEST_F(NextPermutationTest, TestSetElem)
+{
+    size_t size = 1;
+    while ((size *= 10) <= MEDIUM_TEST) {
+        size_t cnt = 1000;
+        for (size_t i = 0; i < cnt; ++i) {
+            INextPermutation *splay = new SplayNextPermutation(),
+                             *simply = new VectorNextPermutation();
+            genTest(size, 0, (long long)size / 2LL * (i + 1LL), {0, 0.2, 0.8, 0, 0});
+            applyTests(simply, splay, false);
+            delete splay;
+            delete simply;
+        }
+    }
+}
+
+TEST_F(NextPermutationTest, TestAdd)
+{
+    size_t size = 1;
+    while ((size *= 10) <= MEDIUM_TEST) {
+        size_t cnt = 1000;
+        for (size_t i = 0; i < cnt; ++i) {
+            INextPermutation *splay = new SplayNextPermutation(),
+                             *simply = new VectorNextPermutation();
+            genTest(size, 0, (long long)size / 2LL * (i + 1LL), {0, 0.2, 0, 0.8, 0});
+            applyTests(simply, splay, false);
+            delete splay;
+            delete simply;
+        }
+    }
+}
+
+
+TEST_F(NextPermutationTest, CompareWorkingTime)
+{
+
+    size_t size = 1e6;
+    INextPermutation *splay = new SplayNextPermutation(),
+                     *simply = new VectorNextPermutation();
+    genTest(size, 0, (long long)size, {0.3, 0.3, 0.1, 0.3, 0});
+    long double s1, s2;
+    std::cout << "starting simple realisation on test" << std::endl;
+    s1 = applyTests(nullptr, simply, false, false);
+    std::cout << "starting splay tree on test" << std::endl;
+    s2 = applyTests(nullptr, splay, false, false);
+    std::cout << "simple realisation as vector has worked for a " << s1 << " seconds" << std::endl;
+    std::cout << "splay has worked for a " << s2 << " seconds" << std::endl;
+    delete splay;
+    delete simply;
+}
+
 
 int main(int argc, char **argv)
 {
     std::cerr.setf(std::cerr.fixed);
     std::cerr.precision(9);
-
     testing::InitGoogleTest(&argc, argv);
 //    std::vector<int> v1({1, 2, 3}), v2({2, 4});
 //    EXPECT_EQ(v1, v2);

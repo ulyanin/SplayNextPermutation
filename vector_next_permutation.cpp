@@ -7,7 +7,7 @@ VectorNextPermutation::VectorNextPermutation()
 void VectorNextPermutation::addOnSegment(size_t L, size_t R, long long add)
 {
     std::transform(data_.begin() + L, data_.begin() + R + 1,
-                   data_.begin(),
+                   data_.begin() + L,
                    [add] (long long elem) {
                        return elem + add;
                    });
@@ -15,7 +15,7 @@ void VectorNextPermutation::addOnSegment(size_t L, size_t R, long long add)
 
 long long VectorNextPermutation::getSumOnSegment(size_t L, size_t R)
 {
-    return std::accumulate(data_.begin() + L, data_.begin() + R + 1, 0);
+    return std::accumulate(data_.begin() + L, data_.begin() + R + 1, (long long)0);
 }
 
 void VectorNextPermutation::applyNextPermutation(size_t L, size_t R)
