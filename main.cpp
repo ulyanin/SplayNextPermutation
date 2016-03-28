@@ -87,18 +87,20 @@ protected:
     void genTest(size_t testSize, long long minValue, long long maxValue,
                  std::vector<double> prob={0.2, 0.2, 0.2, 0.2, 0.2})
     {
+        tests_.clear();
         tests_.push_back(TestData(
                 TestData::tInsertElem, 0, genRandomValue(minValue, maxValue)
         ));
         assert(prob.size() == 5 &&
                abs(std::accumulate(prob.begin(), prob.begin() + 5, (double)0) - 1.0) < 1e-5);
+        //int k = 0;
         for (size_t num = 1; tests_.size() < testSize; ) {
             size_t L, R;
             switch (genTestType(prob)) {
                 case TestData::tGetSum:
                     L = genRandomPos(0, num - 1);
                     R = genRandomPos(L, num - 1);
-                    std::cout << R - L << std::endl;
+                    //std::cout << R - L << std::endl;
                     tests_.push_back(TestData(
                             TestData::tGetSum,
                             L, R
@@ -120,9 +122,10 @@ protected:
                     ));
                     break;
                 case TestData::tAdd:
+                    //++k;
                     L = genRandomPos(0, num - 1);
                     R = genRandomPos(L, num - 1);
-                    std::cout << R - L << std::endl;
+                    //std::cout << L << " " << R << std::endl;
                     tests_.push_back(TestData(
                             TestData::tAdd,
                             L, R,
@@ -132,14 +135,14 @@ protected:
                 case TestData::tNextPermutation:
                     L = genRandomPos(0, num - 1);
                     R = genRandomPos(L, num - 1);
-                std::cout << R - L << std::endl;
+                    //std::cout << R - L << std::endl;
                     tests_.push_back(TestData(
                             TestData::tNextPermutation,
                             L, R
                     ));
             }
         }
-
+        //std::cout << tests_.size() - k << " " << k << std::endl;
     }
 
     void applyGetSum(const TestData &test)

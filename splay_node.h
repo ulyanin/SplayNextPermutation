@@ -5,10 +5,10 @@
 class Node
 {
 public:
-//    typedef std::shared_ptr<Node> NodePtr;
-//    typedef std::weak_ptr<Node> NodeWeakPtr;
-    typedef Node * NodePtr;
-    typedef Node * NodeWeakPtr;
+    typedef std::shared_ptr<Node> NodePtr;
+    typedef std::weak_ptr<Node> NodeWeakPtr;
+//    typedef Node * NodePtr;
+//    typedef Node * NodeWeakPtr;
     Node(long long value);
     Node(Node &&);
     ~Node();
@@ -24,10 +24,10 @@ public:
     static void printLeaves(NodePtr root, bool reverse=0);
     static void printAsTree(NodePtr root, int depth=0, bool reverse=0);
     static void printAsTreeExtended(NodePtr root, int depth=0, bool reverse=0);
-    static bool exist(const NodePtr);
-    static void fullPush(NodePtr x);
-//    static bool exist(const NodeWeakPtr);
+    static bool exist(const NodePtr &);
+    static bool exist(const NodeWeakPtr &);
     static void checkIntegrity(NodePtr root, NodePtr parent=nullptr);
+    static void fullPush(NodePtr x);
     static NodePtr splay(NodePtr);
     static NodePtr getKth(NodePtr, int);
     static std::pair<NodePtr, NodePtr> split(NodePtr root, int pos);
@@ -57,7 +57,7 @@ protected:
     static int getSortedPrefix(NodePtr);
     NodePtr left_,
             right_;
-    NodePtr parent_;
+    NodeWeakPtr parent_;
     int subTreeSize_, sortedSuffix_, sortedPrefix_;
     long long value_, sum_, add_, first_, last_;
     bool needReverse_;

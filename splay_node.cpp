@@ -3,10 +3,10 @@
 #include <stdexcept>
 #include "splay_node.h"
 
-Node::Node(long long int value)
+Node::Node(long long value)
     : left_(nullptr)
     , right_(nullptr)
-    , parent_(nullptr)
+    , parent_()
     , subTreeSize_(1)
     , sortedSuffix_(1)
     , sortedPrefix_(1)
@@ -20,7 +20,7 @@ Node::Node(long long int value)
 
 Node::~Node()
 {
-    delete left_;
+    /*delete left_;
     delete right_;
     if (exist(parent_)) {
         if (parent_->left_ == this) {
@@ -29,7 +29,7 @@ Node::~Node()
         if (parent_->right_ == this) {
             parent_->right_ = nullptr;
         }
-    }
+    }*/
 }
 
 Node::Node(Node &&other)
@@ -51,22 +51,27 @@ Node::Node(Node &&other)
 
 Node::NodePtr Node::makeOneNodeCopy(const NodePtr &other)
 {
-    return (exist(other) ? new Node(*other) : nullptr);
+    return (exist(other) ? NodePtr(new Node(*other)) : nullptr);
 }
 
 Node::NodePtr Node::makeFullCopy(const NodePtr &other)
 {
     if (!exist(other))
         return nullptr;
-    Node * res = makeOneNodeCopy(other);
+    NodePtr res = makeOneNodeCopy(other);
     res->left_ = makeFullCopy(other->left_);
     res->right_ = makeFullCopy(other->right_);
     return res;
 }
 
-bool Node::exist(NodePtr x)
+bool Node::exist(const NodePtr &x)
 {
     return x != nullptr;
+}
+
+bool Node::exist(const NodeWeakPtr &x)
+{
+    return !x.expired();
 }
 
 Node::NodePtr Node::rotate(NodePtr &x, NodePtr p)
@@ -128,7 +133,7 @@ Node::NodePtr Node::rotateRight(NodePtr &x, NodePtr p)
 {
     if (!exist(p))
         return x;
-    makeNewChild(x, p, p->parent_);
+    makeNewChild(x, p, p->parent_.lock());
     //p->left_= x->right_;
     makeLeftChild(p, x->right_);
     //x->right_ = p;
@@ -136,7 +141,7 @@ Node::NodePtr Node::rotateRight(NodePtr &x, NodePtr p)
     makeRightChild(x, p);
     reCalc(p);
     reCalc(x);
-    reCalc(x->parent_);
+    reCalc(x->parent_.lock());
     return x;
 }
 
@@ -144,7 +149,7 @@ Node::NodePtr Node::rotateLeft(NodePtr &x, NodePtr p)
 {
     if (!exist(p))
         return x;
-    makeNewChild(x, p, p->parent_);
+    makeNewChild(x, p, p->parent_.lock());
     //p->right_ = x->left_;
     makeRightChild(p, x->left_);
     //p->parent_ = x;
@@ -152,7 +157,7 @@ Node::NodePtr Node::rotateLeft(NodePtr &x, NodePtr p)
     makeLeftChild(x, p);
     reCalc(p);
     reCalc(x);
-    reCalc(x->parent_);
+    reCalc(x->parent_.lock());
     return x;
 }
 
@@ -298,10 +303,10 @@ Node::NodePtr Node::getKth(NodePtr x, int pos)
 
 Node::NodePtr Node::splay(NodePtr x)
 {
-    NodePtr p = x->parent_;
+    NodePtr p = x->parent_.lock();
     if (!exist(p))
         return x;
-    NodePtr gp = p->parent_;
+    NodePtr gp = p->parent_.lock();
     if (!exist(gp)) {
         return rotate(x, p);
     }
@@ -328,7 +333,8 @@ std::pair<Node::NodePtr, Node::NodePtr> Node::split(NodePtr root, int pos)
     std::pair<NodePtr, NodePtr> p(root->left_, root);
     root->left_ = nullptr;
     if (p.first) {
-        p.first->parent_ = nullptr;
+        //p.first->parent_ = nullptr;
+        p.first->parent_.reset();
     }
     reCalc(p.second);
     reCalc(p.first);
@@ -464,7 +470,7 @@ void Node::insertValue(NodePtr &x, int newPos, long long val)
         throw std::runtime_error("bad index in insert value");
 #endif
     auto p = split(x, newPos);
-    NodePtr newNode = new Node(val);
+    NodePtr newNode(new Node(val));
     merge(p.first, merge(newNode, p.second));
     x = splay(newNode);
 }
@@ -540,7 +546,7 @@ void Node::checkIntegrity(NodePtr root, NodePtr parent)
 {
     if (!exist(root))
         return;
-    if (root->parent_ != parent) {
+    if (root->parent_.lock() != parent) {
         std::cerr << "error while checking integrity" << std::endl;
         //throw "error while checking integrity";
     }
