@@ -87,6 +87,7 @@ protected:
     void genTest(size_t testSize, long long minValue, long long maxValue,
                  std::vector<double> prob={0.2, 0.2, 0.2, 0.2, 0.2})
     {
+        tests_.clear();
         tests_.push_back(TestData(
                 TestData::tInsertElem, 0, genRandomValue(minValue, maxValue)
         ));
@@ -98,7 +99,7 @@ protected:
                 case TestData::tGetSum:
                     L = genRandomPos(0, num - 1);
                     R = genRandomPos(L, num - 1);
-                    std::cout << R - L << std::endl;
+                    //std::cout << R - L << std::endl;
                     tests_.push_back(TestData(
                             TestData::tGetSum,
                             L, R
@@ -122,7 +123,7 @@ protected:
                 case TestData::tAdd:
                     L = genRandomPos(0, num - 1);
                     R = genRandomPos(L, num - 1);
-                    std::cout << R - L << std::endl;
+                    //std::cout << R - L << std::endl;
                     tests_.push_back(TestData(
                             TestData::tAdd,
                             L, R,
@@ -132,7 +133,7 @@ protected:
                 case TestData::tNextPermutation:
                     L = genRandomPos(0, num - 1);
                     R = genRandomPos(L, num - 1);
-                std::cout << R - L << std::endl;
+                    //std::cout << R - L << std::endl;
                     tests_.push_back(TestData(
                             TestData::tNextPermutation,
                             L, R
@@ -337,7 +338,7 @@ TEST_F(NextPermutationTest, TestAdd)
 TEST_F(NextPermutationTest, CompareWorkingTime)
 {
 
-    size_t size = 1e6;
+    size_t size = 1e6 / 2;
     INextPermutation *splay = new SplayNextPermutation(),
                      *simply = new VectorNextPermutation();
     genTest(size, 0, (long long)size, {0.3, 0.3, 0.1, 0.3, 0});
