@@ -12,6 +12,7 @@ const size_t MEDIUM_TEST = 5e3;
 const size_t LARGE_TEST = 1e5;
 const size_t EXTRA_LARGE_TEST = 5e6;
 const size_t MAX_TEST = 1e8;
+const int RANDOM_SEED = 42 * 666 * 13;
 
 class TestData
 {
@@ -40,7 +41,7 @@ class NextPermutationTest : public ::testing::Test
 public:
     virtual void SetUp()
     {
-        engine.seed(42 + 666 + 13 * 179);
+        engine.seed(RANDOM_SEED);
         tests_.clear();
         randomRange = std::uniform_int_distribution<size_t>();
         randomProbability = std::uniform_real_distribution<double>(0, 1);
@@ -93,14 +94,12 @@ protected:
         ));
         assert(prob.size() == 5 &&
                abs(std::accumulate(prob.begin(), prob.begin() + 5, (double)0) - 1.0) < 1e-5);
-        //int k = 0;
         for (size_t num = 1; tests_.size() < testSize; ) {
             size_t L, R;
             switch (genTestType(prob)) {
                 case TestData::tGetSum:
                     L = genRandomPos(0, num - 1);
                     R = genRandomPos(L, num - 1);
-                    //std::cout << R - L << std::endl;
                     tests_.push_back(TestData(
                             TestData::tGetSum,
                             L, R
@@ -122,10 +121,8 @@ protected:
                     ));
                     break;
                 case TestData::tAdd:
-                    //++k;
                     L = genRandomPos(0, num - 1);
                     R = genRandomPos(L, num - 1);
-                    //std::cout << L << " " << R << std::endl;
                     tests_.push_back(TestData(
                             TestData::tAdd,
                             L, R,
@@ -135,14 +132,68 @@ protected:
                 case TestData::tNextPermutation:
                     L = genRandomPos(0, num - 1);
                     R = genRandomPos(L, num - 1);
-                    //std::cout << R - L << std::endl;
                     tests_.push_back(TestData(
                             TestData::tNextPermutation,
                             L, R
                     ));
             }
         }
-        //std::cout << tests_.size() - k << " " << k << std::endl;
+    }
+
+
+    void genExtraTest(size_t testSize, long long minValue, long long maxValue,
+                 std::vector<double> prob={0.2, 0.2, 0.2, 0.2, 0.2})
+    {
+        tests_.clear();
+        tests_.push_back(TestData(
+                TestData::tInsertElem, 0, genRandomValue(minValue, maxValue)
+        ));
+        assert(prob.size() == 5 &&
+               abs(std::accumulate(prob.begin(), prob.begin() + 5, (double)0) - 1.0) < 1e-5);
+        for (size_t num = 1; tests_.size() < testSize; ) {
+            size_t L, R;
+            switch (genTestType(prob)) {
+                case TestData::tGetSum:
+                    L = 0;
+                    R = num - 1;
+                    tests_.push_back(TestData(
+                            TestData::tGetSum,
+                            L, R
+                    ));
+                    break;
+                case TestData::tInsertElem:
+                    tests_.push_back(TestData(
+                            TestData::tInsertElem,
+                            genRandomPos(0, num),
+                            genRandomValue(minValue, maxValue)
+                    ));
+                    ++num;
+                    break;
+                case TestData::tSetElem:
+                    tests_.push_back(TestData(
+                            TestData::tSetElem,
+                            genRandomPos(0, num - 1),
+                            genRandomValue(minValue, maxValue)
+                    ));
+                    break;
+                case TestData::tAdd:
+                    L = 0;
+                    R = num - 1;
+                    tests_.push_back(TestData(
+                            TestData::tAdd,
+                            L, R,
+                            genRandomValue(minValue, maxValue)
+                    ));
+                    break;
+                case TestData::tNextPermutation:
+                    L = 0;
+                    R = num - 1;
+                    tests_.push_back(TestData(
+                            TestData::tNextPermutation,
+                            L, R
+                    ));
+            }
+        }
     }
 
     void applyGetSum(const TestData &test)
@@ -340,10 +391,10 @@ TEST_F(NextPermutationTest, TestAdd)
 TEST_F(NextPermutationTest, CompareWorkingTime)
 {
 
-    size_t size = 1e6;
+    size_t size = 1e5;
     INextPermutation *splay = new SplayNextPermutation(),
                      *simply = new VectorNextPermutation();
-    genTest(size, 0, (long long)size, {0.3, 0.3, 0.1, 0.3, 0});
+    genTest(size, 0, (long long)size, {0.3, 0.1, 0.1, 0.2, 0.3});
     long double s1, s2;
     std::cout << "starting simple realisation on test" << std::endl;
     s1 = applyTests(nullptr, simply, false, false);
@@ -351,18 +402,34 @@ TEST_F(NextPermutationTest, CompareWorkingTime)
     s2 = applyTests(nullptr, splay, false, false);
     std::cout << "simple realisation as vector has worked for a " << s1 << " seconds" << std::endl;
     std::cout << "splay has worked for a " << s2 << " seconds" << std::endl;
+    std::cout << "splay depth is " << (reinterpret_cast<SplayNextPermutation *>(splay))->depth() << std::endl;
     delete splay;
     delete simply;
 }
 
+TEST_F(NextPermutationTest, CompareWorkingTimeExtra)
+{
+
+    size_t size = 1e6;
+    INextPermutation *splay = new SplayNextPermutation(),
+            *simply = new VectorNextPermutation();
+    genExtraTest(size, 0, (long long)size, {0.3, 0.1, 0.1, 0.2, 0.3});
+    long double s1, s2;
+    std::cout << "starting simple realisation on test" << std::endl;
+    s1 = applyTests(nullptr, simply, false, false);
+    std::cout << "starting splay tree on test" << std::endl;
+    s2 = applyTests(nullptr, splay, false, false);
+    std::cout << "simple realisation as vector has worked for a " << s1 << " seconds" << std::endl;
+    std::cout << "splay has worked for a " << s2 << " seconds" << std::endl;
+    std::cout << "splay depth is " << (reinterpret_cast<SplayNextPermutation *>(splay))->depth() << std::endl;
+    delete splay;
+    delete simply;
+}
 
 int main(int argc, char **argv)
 {
     std::cerr.setf(std::cerr.fixed);
     std::cerr.precision(9);
     testing::InitGoogleTest(&argc, argv);
-//    std::vector<int> v1({1, 2, 3}), v2({2, 4});
-//    EXPECT_EQ(v1, v2);
-
     return RUN_ALL_TESTS();
 }

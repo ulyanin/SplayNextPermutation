@@ -3,7 +3,6 @@
 
 #include <vector>
 
-#define DEBUG
 
 using std::size_t;
 

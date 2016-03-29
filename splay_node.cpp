@@ -95,6 +95,8 @@ bool Node::isRightSon(const NodePtr x, const NodePtr p)
     return exist(p) && (p->right_ == x);
 }
 
+
+// makes 'x' a child of 'gp' instead of 'p'
 void Node::makeNewChild(NodePtr x, NodePtr p, NodePtr gp)
 {
     if (exist(x)) {
@@ -134,10 +136,7 @@ Node::NodePtr Node::rotateRight(NodePtr &x, NodePtr p)
     if (!exist(p))
         return x;
     makeNewChild(x, p, p->parent_.lock());
-    //p->left_= x->right_;
     makeLeftChild(p, x->right_);
-    //x->right_ = p;
-    //p->parent_ = x;
     makeRightChild(x, p);
     reCalc(p);
     reCalc(x);
@@ -150,10 +149,7 @@ Node::NodePtr Node::rotateLeft(NodePtr &x, NodePtr p)
     if (!exist(p))
         return x;
     makeNewChild(x, p, p->parent_.lock());
-    //p->right_ = x->left_;
     makeRightChild(p, x->left_);
-    //p->parent_ = x;
-    //x->left_ = p;
     makeLeftChild(x, p);
     reCalc(p);
     reCalc(x);
@@ -471,7 +467,7 @@ void Node::insertValue(NodePtr &x, int newPos, long long val)
 #endif
     auto p = split(x, newPos);
     NodePtr newNode(new Node(val));
-    merge(p.first, merge(newNode, p.second));
+    NodePtr tmp = merge(p.first, merge(newNode, p.second));
     x = splay(newNode);
 }
 
@@ -573,4 +569,11 @@ void Node::fullPush(NodePtr x)
         fullPush(x->right_);
         reCalc(x);
     }
+}
+
+int Node::depth(NodePtr x)
+{
+    if (x == nullptr)
+        return 0;
+    return std::max(depth(x->left_), depth(x->right_)) + 1;
 }

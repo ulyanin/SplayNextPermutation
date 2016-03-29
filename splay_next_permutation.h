@@ -13,13 +13,13 @@ class SplayNextPermutation
 {
 public:
     SplayNextPermutation();
-    virtual long long getSumOnSegment(size_t L, size_t R);
-    virtual void insert(size_t newPos, long long x);
-    virtual void setElem(size_t pos, long long x);
-    virtual void addOnSegment(size_t L, size_t R, long long add);
-    virtual void applyNextPermutation(size_t L, size_t R);
-    //virtual std::vector<long long> getAsVector(int L, int R);
-    virtual size_t size() const;
+    virtual long long getSumOnSegment(size_t L, size_t R) override ;
+    virtual void insert(size_t newPos, long long x) override ;
+    virtual void setElem(size_t pos, long long x) override ;
+    virtual void addOnSegment(size_t L, size_t R, long long add) override ;
+    virtual void applyNextPermutation(size_t L, size_t R) override ;
+    virtual size_t size() const override;
+    size_t depth() const;
 protected:
     Node::NodePtr root_;
 };

@@ -1,4 +1,6 @@
 #include "splay_next_permutation.h"
+#include <chrono>
+#include <iostream>
 
 SplayNextPermutation::SplayNextPermutation()
 {
@@ -25,12 +27,22 @@ void SplayNextPermutation::addOnSegment(size_t L, size_t R, long long add)
     Node::addOnSegment(root_, L, R, add);
 }
 
+//int ssss = 0;
+
 void SplayNextPermutation::applyNextPermutation(size_t L, size_t R)
 {
     Node::nextPermutationOnSegment(root_, L, R);
+    //++ssss;
+    //if (ssss % 10000 == 0)
+        //std::cout << Node::getSubTreeSize(root_) << " " << Node::depth(root_) << std::endl;
 }
 
 size_t SplayNextPermutation::size() const
 {
     return Node::getSubTreeSize(root_);
+}
+
+size_t SplayNextPermutation::depth() const
+{
+    return Node::depth(root_);
 }

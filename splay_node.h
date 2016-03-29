@@ -7,8 +7,6 @@ class Node
 public:
     typedef std::shared_ptr<Node> NodePtr;
     typedef std::weak_ptr<Node> NodeWeakPtr;
-//    typedef Node * NodePtr;
-//    typedef Node * NodeWeakPtr;
     Node(long long value);
     Node(Node &&);
     ~Node();
@@ -33,6 +31,7 @@ public:
     static std::pair<NodePtr, NodePtr> split(NodePtr root, int pos);
     static NodePtr merge(NodePtr, NodePtr);
     static int getSubTreeSize(NodePtr);
+    static int depth(NodePtr);
 protected:
     // must be sorted in descending order!!!
     static NodePtr findFirstGreater(NodePtr, long long);
