@@ -1,5 +1,6 @@
 #include "vector_next_permutataion.h"
 #include <algorithm>
+#include <numeric>
 
 VectorNextPermutation::VectorNextPermutation()
 {}

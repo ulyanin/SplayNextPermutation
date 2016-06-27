@@ -6,6 +6,7 @@
 #include <chrono>
 #include <random>
 #include <vector>
+#include <numeric>
 
 const size_t SMALL_TEST = 100;
 const size_t MEDIUM_TEST = 5e3;
@@ -92,7 +93,7 @@ protected:
                 TestData::tInsertElem, 0, genRandomValue(minValue, maxValue)
         ));
         assert(prob.size() == 5 &&
-               abs(std::accumulate(prob.begin(), prob.begin() + 5, (double)0) - 1.0) < 1e-5);
+               std::abs(std::accumulate(prob.begin(), prob.begin() + 5, (double)0) - 1.0) < 1e-5);
         for (size_t num = 1; tests_.size() < testSize; ) {
             size_t L, R;
             switch (genTestType(prob)) {
